@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TBR Rewards</title>
+<script>
+// Telegram polyfill - prevents ALL script errors in browser mode
+window.Telegram = window.Telegram || {
+  WebApp: {
+    ready: function(){},
+    expand: function(){},
+    openLink: function(url){ window.open(url,'_blank'); },
+    openTelegramLink: function(url){ window.open(url,'_blank'); },
+    initDataUnsafe: { user: null },
+    close: function(){}
+  }
+};
+// Try to load real SDK (only works inside Telegram)
+try {
+  var _tgs = document.createElement('script');
+  _tgs.src = 'https://telegram.org/js/telegram-web-app.js';
+  _tgs.async = true;
+  _tgs.onerror = function(){ /* silently ignore in browser mode */ };
+  document.head.appendChild(_tgs);
+} catch(e) { /* ignore */ }
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --navy:#0A1628;--navy2:#0F1E38;--navy3:#162544;--navy4:#1C2F52;
+  --cyan:#00C6FF;--cyan2:#0099CC;--teal:#00E5C3;--teal2:#00B89A;
+  --w1:#F0F6FF;--w2:#C8D8F0;--w3:#8BA3C4;--w4:#4A6180;
+  --green:#22C55E;--red:#EF4444;--orange:#F97316;
+  --r8:8px;--r12:12px;--r16:16px;--r24:24px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--w1);overscroll-behavior:none}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:90px;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ONBOARDING */
+#ob{position:fixed;inset:0;background:var(--navy);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 24px 40px;overflow-y:auto}
+.ob-logo{width:76px;height:76px;background:linear-gradient(135deg,var(--cyan),var(--teal));border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--navy);margin:20px 0 20px;box-shadow:0 0 40px rgba(0,198,255,0.3)}
+.ob-h{font-size:26px;font-weight:800;text-align:center;margin-bottom:8px}
+.ob-h span{background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ob-sub{font-size:13px;color:var(--w3);text-align:center;margin-bottom:28px;line-height:1.6}
+.ob-card{background:var(--navy2);border:1px solid rgba(0,198,255,0.15);border-radius:var(--r24);padding:22px;width:100%;max-width:380px;margin-bottom:14px}
+.ob-ct{font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.ob-q{margin-bottom:18px}
+.ob-ql{font-size:14px;font-weight:600;margin-bottom:10px}
+.ob-opts{display:flex;gap:8px;flex-wrap:wrap}
+.ob-opt{flex:1;min-width:80px;padding:12px 8px;background:var(--navy3);border:1.5px solid var(--navy4);border-radius:var(--r12);text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--w2);transition:all .2s}
+.ob-opt.sel{background:rgba(0,198,255,.12);border-color:var(--cyan);color:var(--cyan)}
+.age-row{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.age-row input{width:20px;height:20px;accent-color:var(--cyan);flex-shrink:0;margin-top:2px}
+.age-lbl{font-size:13px;color:var(--w2);line-height:1.5}
+.ob-inp{width:100%;background:var(--navy3);border:1.5px solid var(--navy4);border-radius:var(--r12);padding:14px 16px;color:var(--w1);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+.ob-inp:focus{border-color:var(--cyan)}
+.ob-inp::placeholder{color:var(--w4)}
+.ob-hint{font-size:11px;color:var(--w4);margin-top:6px}
+.ob-btn{width:100%;max-width:380px;background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r16);padding:18px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 24px rgba(0,198,255,.35);margin-top:8px}
+
+/* HEADER */
+.hdr{padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-bottom:1px solid rgba(0,198,255,.08)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--navy)}
+.logo-nm{font-size:17px;font-weight:800}
+.logo-nm span{background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-r{display:flex;gap:8px}
+.av-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cyan2),var(--teal2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--navy);border:2px solid rgba(0,198,255,.3)}
+.menu-btn{width:36px;height:36px;border-radius:50%;background:var(--navy2);border:1px solid var(--navy4);color:var(--w2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
+
+/* BALANCE */
+.bal-wrap{padding:16px 20px 0}
+.bal-card{background:linear-gradient(135deg,var(--navy2),var(--navy3),#0D2240);border:1px solid rgba(0,198,255,.2);border-radius:var(--r24);padding:22px;position:relative;overflow:hidden}
+.bal-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(0,198,255,.1) 0%,transparent 70%);pointer-events:none}
+.bal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.bal-lbl{font-size:11px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.bal-amt{font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.bal-sub{font-size:12px;color:var(--w3);margin-top:5px}
+.u-pill{background:rgba(0,198,255,.1);border:1px solid rgba(0,198,255,.2);border-radius:20px;padding:8px 14px;text-align:right}
+.u-pill-nm{font-size:13px;font-weight:700}
+.u-pill-id{font-size:10px;color:var(--w3);margin-top:2px}
+.day-prog{margin-bottom:16px}
+.dp-hdr{display:flex;justify-content:space-between;margin-bottom:6px}
+.dp-lbl{font-size:12px;color:var(--w3);font-weight:500}
+.dp-val{font-size:12px;color:var(--cyan);font-weight:700}
+.dp-track{height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.dp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--teal));border-radius:4px;transition:width .6s ease}
+.bal-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.bal-act{background:rgba(255,255,255,.05);border:1px solid rgba(0,198,255,.1);border-radius:var(--r12);padding:10px 6px;text-align:center;cursor:pointer}
+.ba-ic{font-size:16px;margin-bottom:4px}
+.ba-lb{font-size:10px;color:var(--w3);font-weight:500}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 20px 0}
+.stat{background:var(--navy2);border:1px solid var(--navy4);border-radius:var(--r16);padding:14px 12px;text-align:center}
+.sv{font-size:20px;font-weight:800;margin-bottom:3px}
+.sv.c{color:var(--cyan)}.sv.t{color:var(--teal)}
+.sl{font-size:10px;color:var(--w4);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+
+/* TABS */
+.tabs{display:flex;margin:14px 20px 0;background:var(--navy2);border-radius:var(--r16);padding:4px;gap:2px;border:1px solid var(--navy4)}
+.tab{flex:1;padding:10px 4px;border-radius:var(--r12);border:none;background:transparent;color:var(--w3);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .2s}
+.tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5}
+.tab.on{background:var(--navy4);color:var(--cyan);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* PAGES */
+.pg{display:none;padding:16px 20px}
+.pg.on{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.stitle{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sbadge{background:linear-gradient(90deg,var(--cyan),var(--teal));color:var(--navy);font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px}
+
+/* TODAY SUMMARY */
+.today-sum{background:linear-gradient(135deg,rgba(0,198,255,.08),rgba(0,229,195,.05));border:1px solid rgba(0,198,255,.15);border-radius:var(--r16);padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.ts-lbl{font-size:11px;color:var(--w3);font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.ts-earn{font-size:22px;font-weight:800;color:var(--teal)}
+.ts-left{font-size:28px;font-weight:800}
+.ts-lbl2{font-size:10px;color:var(--w3)}
+
+/* AD CARDS */
+.adc{background:var(--navy2);border:1px solid var(--navy4);border-radius:var(--r16);margin-bottom:12px;overflow:hidden;transition:border-color .2s,transform .15s;cursor:pointer}
+.adc:not(.lk):not(.dn):hover{border-color:rgba(0,198,255,.4);transform:translateY(-1px)}
+.adc.lk{opacity:.4;cursor:not-allowed}
+.adc.dn{border-color:rgba(34,197,94,.3)}
+.adc-in{padding:16px 18px}
+.adc-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.adc-play{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(0,198,255,.3)}
+.adc-play svg{width:18px;height:18px;fill:var(--navy);margin-left:2px}
+.adc-play.dp{background:linear-gradient(135deg,var(--green),#16A34A)}
+.adc-play.dp svg{fill:white;margin-left:0}
+.adc-meta{flex:1}
+.adc-nm{font-size:14px;font-weight:700;margin-bottom:3px}
+.adc-hn{font-size:12px;color:var(--w3)}
+.adc-rw{background:linear-gradient(135deg,var(--cyan2),var(--teal2));color:white;font-size:13px;font-weight:800;padding:8px 14px;border-radius:20px;white-space:nowrap}
+.adc-rw.db{background:linear-gradient(135deg,var(--green),#16A34A)}
+.adc-pb{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-bottom:8px}
+.adc-pf{height:100%;background:linear-gradient(90deg,var(--cyan),var(--teal));border-radius:2px}
+.adc-sr{display:flex;align-items:center;justify-content:space-between}
+.adc-st{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.adc-st.r{color:var(--teal)}.adc-st.d{color:var(--green)}.adc-st.l{color:var(--w4)}
+.sd{width:6px;height:6px;border-radius:50%}
+.sd.g{background:var(--green)}.sd.c{background:var(--cyan);animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.adc-ct{font-size:11px;color:var(--w4)}
+
+/* REFERRAL BALANCE BOX */
+.ref-bal-box{background:linear-gradient(135deg,rgba(0,229,195,.08),rgba(0,198,255,.05));border:1.5px solid rgba(0,229,195,.25);border-radius:var(--r16);padding:18px;margin-top:14px}
+.ref-bal-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ref-bal-icon{font-size:28px;flex-shrink:0}
+.ref-bal-title{font-size:14px;font-weight:800;color:var(--w1)}
+.ref-bal-sub{font-size:11px;color:var(--w3);margin-top:2px}
+.ref-bal-amount{font-size:24px;font-weight:800;color:var(--teal);margin-left:auto}
+.ref-bal-progress{margin-bottom:10px}
+.ref-bal-track{height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.ref-bal-fill{height:100%;background:linear-gradient(90deg,var(--teal2),var(--teal));border-radius:4px;transition:width .5s ease}
+.ref-bal-needed{font-size:11px;color:var(--teal);font-weight:600}
+.ref-bal-note{font-size:11px;color:var(--w4);line-height:1.5;padding-top:10px;border-top:1px solid rgba(0,229,195,.1)}
+
+/* INVITE MODAL */
+.inv-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:none;align-items:flex-end;justify-content:center}
+.inv-modal-overlay.on{display:flex;animation:fi .3s ease}
+.inv-modal{background:var(--navy2);border:1px solid rgba(0,229,195,.25);border-radius:28px 28px 0 0;padding:28px 24px 40px;width:100%;max-width:430px}
+.inv-modal-emoji{font-size:52px;text-align:center;margin-bottom:14px}
+.inv-modal-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:-.5px}
+.inv-modal-title span{background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.inv-modal-sub{font-size:14px;color:var(--w3);text-align:center;line-height:1.6;margin-bottom:20px}
+.inv-modal-bonus{background:linear-gradient(135deg,rgba(0,229,195,.1),rgba(0,198,255,.08));border:1px solid rgba(0,229,195,.2);border-radius:var(--r16);padding:16px;text-align:center;margin-bottom:20px}
+.inv-modal-bonus-amt{font-size:36px;font-weight:800;color:var(--teal);letter-spacing:-1px}
+.inv-modal-bonus-lbl{font-size:12px;color:var(--w3);margin-top:4px}
+.inv-modal-bonus-note{font-size:11px;color:var(--w4);margin-top:6px}
+.inv-modal-btn{width:100%;background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r16);padding:17px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.inv-modal-skip{width:100%;background:transparent;border:1px solid var(--navy4);border-radius:var(--r16);padding:13px;font-size:13px;font-weight:600;color:var(--w3);cursor:pointer;font-family:inherit}
+
+/* INVITE */
+.inv-hero{background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid rgba(0,198,255,.2);border-radius:var(--r24);padding:24px;margin-bottom:16px;text-align:center;position:relative;overflow:hidden}
+.inv-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(0,198,255,.08) 0%,transparent 70%)}
+.inv-em{font-size:44px;margin-bottom:12px;display:block}
+.inv-amt{font-size:30px;font-weight:800;color:var(--cyan);margin-bottom:4px}
+.inv-tt{font-size:18px;font-weight:800;margin-bottom:8px}
+.inv-dc{font-size:13px;color:var(--w3);line-height:1.6;margin-bottom:20px}
+.lnk-row{background:var(--navy3);border:1px solid var(--navy4);border-radius:var(--r12);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lnk-txt{flex:1;font-size:11px;color:var(--w2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpy-btn{background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r8);padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.shr-btn{width:100%;background:rgba(0,198,255,.08);border:1.5px solid rgba(0,198,255,.25);border-radius:var(--r12);padding:14px;color:var(--cyan);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.ref-box{background:var(--navy2);border:1px solid var(--navy4);border-radius:var(--r16);padding:16px 10px;text-align:center}
+.rb-n{font-size:10px;color:var(--w4);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px}
+.rb-a{font-size:20px;font-weight:800;color:var(--cyan)}
+.rb-l{font-size:10px;color:var(--w3);margin-top:3px}
+.inv-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.is{background:var(--navy2);border:1px solid var(--navy4);border-radius:var(--r16);padding:16px;text-align:center}
+.is-v{font-size:22px;font-weight:800;margin-bottom:4px}
+.is-l{font-size:10px;color:var(--w4);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+
+/* WITHDRAW */
+.wm{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.mc{background:var(--navy2);border:1.5px solid var(--navy4);border-radius:var(--r16);padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.mc.sel{border-color:var(--cyan);background:rgba(0,198,255,.07)}
+.mc-ic{font-size:26px;margin-bottom:6px;display:block}
+.mc-nm{font-size:12px;font-weight:700;color:var(--w2);margin-bottom:2px}
+.mc.sel .mc-nm{color:var(--cyan)}
+.mc-mn{font-size:10px;color:var(--w4)}
+.mc.sel .mc-mn{color:var(--teal)}
+.ig{margin-bottom:16px}
+.il{font-size:11px;font-weight:700;color:var(--w3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:block}
+.if{width:100%;background:var(--navy2);border:1.5px solid var(--navy4);border-radius:var(--r12);padding:14px 16px;color:var(--w1);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+.if:focus{border-color:var(--cyan)}
+.if::placeholder{color:var(--w4)}
+.ih{font-size:11px;color:var(--w4);margin-top:6px}
+.ih span{color:var(--cyan)}
+.wb{width:100%;background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r16);padding:17px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(0,198,255,.25);margin-bottom:24px}
+.hi{background:var(--navy2);border:1px solid var(--navy4);border-radius:var(--r12);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hm{font-size:13px;font-weight:700}
+.hd{font-size:11px;color:var(--w4);margin-top:2px}
+.ha{font-size:16px;font-weight:800;text-align:right}
+.hs{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:3px}
+.sp{background:rgba(249,115,22,.15);color:var(--orange)}
+.sa{background:rgba(34,197,94,.15);color:var(--green)}
+.sr2{background:rgba(239,68,68,.15);color:var(--red)}
+.eh{text-align:center;padding:32px 20px;color:var(--w4)}
+.eh-i{font-size:36px;margin-bottom:10px}
+.eh-t{font-size:13px}
+
+/* POLICY PAGE */
+#pol{position:fixed;inset:0;background:var(--navy);z-index:500;display:none;flex-direction:column;overflow:hidden}
+#pol.on{display:flex}
+.pol-hdr{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(0,198,255,.1);flex-shrink:0}
+.pol-bk{width:36px;height:36px;border-radius:50%;background:var(--navy2);border:1px solid var(--navy4);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.pol-bk svg{width:18px;height:18px;stroke:var(--cyan);fill:none;stroke-width:2.5}
+.pol-hdr-t{font-size:16px;font-weight:800}
+.pol-sc{flex:1;overflow-y:auto;padding:24px 20px 60px}
+.pol-sc::-webkit-scrollbar{display:none}
+.ph1{font-size:22px;font-weight:800;margin-bottom:4px}
+.pu{font-size:11px;color:var(--w4);margin-bottom:28px}
+.ps{margin-bottom:28px}
+.ph2{font-size:13px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(0,198,255,.1)}
+.pp{font-size:13px;color:var(--w2);line-height:1.9;margin-bottom:10px}
+.pul{list-style:none;padding:0}
+.pul li{font-size:13px;color:var(--w2);line-height:1.9;padding-left:18px;position:relative;margin-bottom:6px}
+.pul li::before{content:'›';position:absolute;left:0;color:var(--cyan);font-weight:700;font-size:15px;line-height:1.5}
+.pbox{background:rgba(0,198,255,.05);border:1px solid rgba(0,198,255,.15);border-left:3px solid var(--cyan);border-radius:var(--r12);padding:16px;margin:14px 0}
+.pbox p{font-size:13px;color:var(--w2);line-height:1.8;margin:0}
+.pbox strong{color:var(--cyan)}
+.ptbl{width:100%;border-collapse:collapse;margin:12px 0}
+.ptbl th{font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid rgba(0,198,255,.15)}
+.ptbl td{font-size:13px;color:var(--w2);padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ptbl tr:last-child td{border-bottom:none}
+
+/* AD WATCH SCREEN */
+#adws{position:fixed;inset:0;z-index:400;display:none;flex-direction:column;background:var(--navy)}
+#adws.on{display:flex;animation:fi .25s ease}
+.aws-hdr{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,198,255,.1);flex-shrink:0}
+.aws-t{font-size:15px;font-weight:700}
+.aws-rw{background:linear-gradient(135deg,var(--cyan2),var(--teal2));color:white;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px}
+.aws-body{flex:1;display:flex;flex-direction:column;padding:0;overflow:hidden;position:relative}
+
+/* AD PREVIEW CARD */
+.ad-preview{width:100%;flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.ad-visual{width:100%;flex:1;position:relative;overflow:hidden;min-height:200px}
+.ad-visual-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .5s}
+.ad-visual-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 30%,rgba(10,22,40,0.95) 100%)}
+.ad-visual-content{position:absolute;bottom:0;left:0;right:0;padding:20px}
+.ad-sponsor{font-size:10px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ad-sponsor-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pl 2s infinite}
+.ad-headline{font-size:18px;font-weight:800;color:white;line-height:1.3;margin-bottom:6px}
+.ad-desc{font-size:13px;color:rgba(255,255,255,.7);line-height:1.5}
+.ad-18{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px}
+
+/* OPEN AD BUTTON */
+.open-ad-btn{margin:0;background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;padding:18px 24px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0;transition:opacity .2s}
+.open-ad-btn:active{opacity:.85}
+.open-ad-btn svg{width:20px;height:20px;fill:var(--navy)}
+
+/* TIMER BAR */
+.aws-foot{padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;background:var(--navy)}
+.tmr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tmr-lbl{font-size:13px;color:var(--w2);font-weight:600;display:flex;align-items:center;gap:6px}
+.tmr-num{font-size:18px;font-weight:800;color:var(--cyan)}
+.tmr-st{font-size:11px;color:var(--w3)}
+.tmr-track{height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.tmr-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--teal));border-radius:6px;width:100%;transition:width 1s linear}
+.claim-btn{width:100%;background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r16);padding:17px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(0,198,255,.3);display:none}
+.claim-btn.show{display:block;animation:fi .3s ease}
+.cnl-btn{width:100%;background:transparent;border:1px solid var(--navy4);border-radius:var(--r16);padding:12px;font-size:13px;font-weight:600;color:var(--w3);cursor:pointer;font-family:inherit;margin-top:8px}
+.stay-hint{text-align:center;font-size:12px;color:var(--w4);margin-top:8px}
+
+/* MENU */
+.mno{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s}
+.mno.on{opacity:1;pointer-events:all}
+.mnp{position:absolute;top:64px;right:16px;background:var(--navy2);border:1px solid rgba(0,198,255,.15);border-radius:var(--r16);overflow:hidden;min-width:200px;transform:scale(.9) translateY(-8px);transform-origin:top right;transition:transform .2s,opacity .2s;opacity:0}
+.mno.on .mnp{transform:scale(1) translateY(0);opacity:1}
+.mi{padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--w1);cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(0,198,255,.07)}
+.mi:last-child{border-bottom:none}
+.mi:hover{background:var(--navy3)}
+.mi svg{width:17px;height:17px;stroke:var(--cyan);fill:none;stroke-width:2;flex-shrink:0}
+
+/* CUSTOMER SUPPORT */
+.cs-fab{position:fixed;bottom:98px;right:18px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));box-shadow:0 4px 20px rgba(0,198,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;border:none;transition:transform .2s}
+.cs-fab:active{transform:scale(.92)}
+.cs-fab svg{width:24px;height:24px;stroke:var(--navy);fill:none;stroke-width:2.5}
+.cs-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--red);border-radius:50%;font-size:10px;font-weight:700;color:white;display:none;align-items:center;justify-content:center}
+.cs-badge.on{display:flex}
+.csw{position:fixed;bottom:165px;right:18px;width:calc(100vw - 36px);max-width:360px;background:var(--navy2);border:1px solid rgba(0,198,255,.2);border-radius:var(--r24);box-shadow:0 16px 48px rgba(0,0,0,.5);z-index:250;display:none;flex-direction:column;overflow:hidden}
+.csw.on{display:flex;animation:su .3s ease}
+.csw.mini{max-height:56px;overflow:hidden}
+@keyframes su{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.cs-hdr{padding:14px 16px;background:linear-gradient(135deg,var(--navy3),var(--navy4));display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(0,198,255,.1)}
+.cs-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.cs-inf{flex:1}
+.cs-nm{font-size:13px;font-weight:700}
+.cs-st{font-size:11px;color:var(--teal);display:flex;align-items:center;gap:4px}
+.cs-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pl 2s infinite}
+.cs-ctrls{display:flex;gap:6px}
+.cs-cb{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:none;color:var(--w3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-family:inherit}
+.cs-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:320px;min-height:180px}
+.cs-body::-webkit-scrollbar{display:none}
+.cmsg{display:flex;gap:8px;align-items:flex-end;max-width:85%}
+.cmsg.b{align-self:flex-start}
+.cmsg.u{align-self:flex-end;flex-direction:row-reverse}
+.cm-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.cm-bbl{padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.5;max-width:100%}
+.cmsg.b .cm-bbl{background:var(--navy3);color:var(--w1);border-bottom-left-radius:4px}
+.cmsg.u .cm-bbl{background:linear-gradient(135deg,var(--cyan2),var(--teal2));color:white;border-bottom-right-radius:4px}
+.cm-t{font-size:10px;color:var(--w4);margin-top:2px;text-align:right}
+.cs-suggs{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.cs-sq{background:rgba(0,198,255,.08);border:1px solid rgba(0,198,255,.2);border-radius:var(--r12);padding:10px 14px;font-size:12px;color:var(--cyan);cursor:pointer;text-align:left;font-family:inherit;font-weight:500;width:100%}
+.cs-sq:hover{background:rgba(0,198,255,.15)}
+.cs-foot{padding:12px 16px;border-top:1px solid rgba(0,198,255,.08);flex-shrink:0}
+.cs-ef{display:none;flex-direction:column;gap:8px}
+.cs-ef.on{display:flex}
+.cs-ei{background:var(--navy3);border:1.5px solid var(--navy4);border-radius:var(--r12);padding:12px 14px;color:var(--w1);font-size:13px;font-family:inherit;outline:none;width:100%}
+.cs-ei:focus{border-color:var(--cyan)}
+.cs-ei::placeholder{color:var(--w4)}
+.cs-ta{resize:none;min-height:70px;font-family:inherit;font-size:13px;line-height:1.5}
+.cs-human-form{display:flex;flex-direction:column;gap:8px}
+.cs-es{background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--navy);border:none;border-radius:var(--r12);padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.cs-fh{font-size:11px;color:var(--w4);text-align:center;padding:6px 0 0}
+
+/* NOTIF */
+.nb{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 40px);max-width:390px;background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid rgba(0,198,255,.25);border-radius:var(--r16);padding:16px 18px;opacity:0;transition:all .4s;z-index:100;pointer-events:none}
+.nb.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+.nb-in{display:flex;align-items:center;gap:12px}
+.nb-ic{font-size:26px;flex-shrink:0}
+.nb-tt{font-size:13px;font-weight:700;margin-bottom:2px}
+.nb-sb{font-size:11px;color:var(--w3)}
+.nb-x{font-size:20px;color:var(--w3);cursor:pointer;padding:4px;flex-shrink:0}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--navy2);border:1px solid rgba(0,198,255,.25);border-radius:var(--r12);padding:12px 20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* COIN */
+@keyframes cu{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(.3);opacity:0}}
+.cfx{position:fixed;pointer-events:none;z-index:600;font-size:22px;animation:cu .9s ease forwards}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--navy2);border-top:1px solid rgba(0,198,255,.1);display:flex;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));z-index:150}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 0}
+.ni svg{width:21px;height:21px;stroke:var(--w4);fill:none;stroke-width:2;transition:stroke .2s}
+.ni span{font-size:10px;font-weight:600;color:var(--w4);transition:color .2s}
+.ni.on svg{stroke:var(--cyan)}
+.ni.on span{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="ob">
+  <div class="ob-logo">T$</div>
+  <div class="ob-h">Welcome to <span>TBR Rewards</span></div>
+  <div class="ob-sub">Watch ads · Invite friends · Earn real money daily</div>
+  <div class="ob-card">
+    <div class="ob-ct">Quick Setup</div>
+    <div class="ob-q">
+      <div class="ob-ql">Your gender</div>
+      <div class="ob-opts">
+        <div class="ob-opt" data-g="gender" data-v="male" onclick="so(this)">♂ Male</div>
+        <div class="ob-opt" data-g="gender" data-v="female" onclick="so(this)">♀ Female</div>
+        <div class="ob-opt" data-g="gender" data-v="other" onclick="so(this)">Other</div>
+      </div>
+    </div>
+    <div class="ob-q">
+      <label class="age-row"><input type="checkbox" id="ageck"><div class="age-lbl">I confirm I am <strong>18 years or older</strong> and agree to the Terms of Use and Privacy Policy.</div></label>
+    </div>
+    <div id="nfw" class="ob-q" style="display:none">
+      <div class="ob-ql">Display name</div>
+      <input class="ob-inp" type="text" id="obni" placeholder="Enter your name..." maxlength="30">
+      <div class="ob-hint">Name taken? Add a number (e.g. Ahmad2)</div>
+    </div>
+  </div>
+  <button class="ob-btn" onclick="startApp()">Start Earning →</button>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="ma" style="display:none">
+  <div class="hdr">
+    <div class="logo"><div class="logo-box">T$</div><div class="logo-nm">TBR <span>Rewards</span></div></div>
+    <div class="hdr-r"><div class="av-btn" id="avb">T</div><div class="menu-btn" onclick="omenu()">⋯</div></div>
+  </div>
+  <div class="scroll" id="sc">
+    <div class="bal-wrap">
+      <div class="bal-card">
+        <div class="bal-top">
+          <div><div class="bal-lbl">Total Balance</div><div class="bal-amt" id="bd">$0.00</div><div class="bal-sub">Available to withdraw</div></div>
+          <div class="u-pill"><div class="u-pill-nm" id="hn">User</div><div class="u-pill-id" id="hi2">ID: ---</div></div>
+        </div>
+        <div class="day-prog">
+          <div class="dp-hdr"><div class="dp-lbl">Today's earning progress</div><div class="dp-val" id="dpv">$0.00 / $0.00</div></div>
+          <div class="dp-track"><div class="dp-fill" id="dpf" style="width:0%"></div></div>
+        </div>
+        <div class="bal-acts">
+          <div class="bal-act" onclick="st('ads')"><div class="ba-ic">▶</div><div class="ba-lb">Ads</div></div>
+          <div class="bal-act" onclick="st('inv')"><div class="ba-ic">👥</div><div class="ba-lb">Invite</div></div>
+          <div class="bal-act" onclick="st('wd')"><div class="ba-ic">💸</div><div class="ba-lb">Withdraw</div></div>
+          <div class="bal-act" onclick="spol()"><div class="ba-ic">📋</div><div class="ba-lb">Policy</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sv" id="sta">0</div><div class="sl">Ads Today</div></div>
+      <div class="stat"><div class="sv c" id="stc">Day 1</div><div class="sl">Current Day</div></div>
+      <div class="stat"><div class="sv t" id="stt">$0.00</div><div class="sl">All-Time</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" id="t-ads" onclick="st('ads')"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Ads</button>
+      <button class="tab" id="t-inv" onclick="st('inv')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Invite</button>
+      <button class="tab" id="t-wd" onclick="st('wd')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Withdraw</button>
+    </div>
+    <!-- ADS -->
+    <div class="pg on" id="p-ads">
+      <div class="today-sum">
+        <div><div class="ts-lbl">Today you can earn</div><div class="ts-earn" id="ted">$0.00</div></div>
+        <div style="text-align:right"><div class="ts-left" id="ald">0</div><div class="ts-lbl2">ads remaining</div></div>
+      </div>
+      <div class="stitle">🎬 Today's Ad Tasks <span class="sbadge" id="abg">0/0</span></div>
+      <div id="adl"></div>
+    </div>
+    <!-- INVITE -->
+    <div class="pg" id="p-inv">
+      <div class="inv-hero">
+        <span class="inv-em">🎁</span>
+        <div class="inv-amt">$0.50 per invite</div>
+        <div class="inv-tt">Invite &amp; Earn</div>
+        <div class="inv-dc">Share your unique referral link and earn for every friend who joins TBR Rewards. Earn through 3 levels of your network!</div>
+        <div class="lnk-row"><div class="lnk-txt" id="rlt">https://t.me/TBRRewardsBot/app?start=</div><button class="cpy-btn" onclick="cpyref()">Copy</button></div>
+        <button class="shr-btn" onclick="shrref()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Share with Friends</button>
+      </div>
+      <div class="stitle">🌳 Referral Levels</div>
+      <div class="ref-grid">
+        <div class="ref-box"><div class="rb-n">Level 1</div><div class="rb-a">$0.50</div><div class="rb-l">Direct</div></div>
+        <div class="ref-box"><div class="rb-n">Level 2</div><div class="rb-a">$0.10</div><div class="rb-l">Indirect</div></div>
+        <div class="ref-box"><div class="rb-n">Level 3</div><div class="rb-a">$0.05</div><div class="rb-l">Extended</div></div>
+      </div>
+      <div class="inv-stats">
+        <div class="is"><div class="is-v" id="fc">0</div><div class="is-l">Friends Invited</div></div>
+        <div class="is"><div class="is-v" id="re">$0.00</div><div class="is-l">Invite Earnings</div></div>
+      </div>
+      <!-- REFERRAL BALANCE BOX -->
+      <div class="ref-bal-box">
+        <div class="ref-bal-header">
+          <div class="ref-bal-icon">🎁</div>
+          <div>
+            <div class="ref-bal-title">Referral Balance</div>
+            <div class="ref-bal-sub">Separate from task earnings</div>
+          </div>
+          <div class="ref-bal-amount" id="refBalDisplay">$0.00</div>
+        </div>
+        <div class="ref-bal-progress">
+          <div class="ref-bal-track"><div class="ref-bal-fill" id="refBalFill" style="width:0%"></div></div>
+          <div class="ref-bal-needed" id="refBalNeeded">Invite 10 more to unlock withdrawal</div>
+        </div>
+        <div class="ref-bal-note">💡 Referral balance withdrawable after 10 successful referrals ($50 minimum)</div>
+      </div>
+    </div>
+    <!-- WITHDRAW -->
+    <div class="pg" id="p-wd">
+      <div class="wm">
+        <div class="mc sel" onclick="sm(this,'paypal','PayPal Email','20','e.g. you@paypal.com')"><span class="mc-ic">🅿️</span><div class="mc-nm">PayPal</div><div class="mc-mn">Min $20.00</div></div>
+        <div class="mc" onclick="sm(this,'bank','Bank Account No.','25','e.g. IBAN or acct no.')"><span class="mc-ic">🏦</span><div class="mc-nm">Bank Account</div><div class="mc-mn">Min $25.00</div></div>
+        <div class="mc" onclick="sm(this,'crypto','USDT TRC20 Wallet','30','e.g. TXyz...abc')"><span class="mc-ic">🪙</span><div class="mc-nm">Crypto (USDT)</div><div class="mc-mn">Min $30.00</div></div>
+        <div class="mc" onclick="sm(this,'cashpack','Phone / Code','35','e.g. +1234567890')"><span class="mc-ic">💵</span><div class="mc-nm">Cash Pack</div><div class="mc-mn">Min $35.00</div></div>
+      </div>
+      <div class="ig"><label class="il">Amount ($)</label><input class="if" type="number" id="wa" placeholder="Enter amount..."><div class="ih">Available: <span id="wav">$0.00</span> · Min: <span id="wm2">$20.00</span></div></div>
+      <div class="ig"><label class="il" id="wal">PayPal Email</label><input class="if" type="text" id="wad" placeholder="e.g. you@paypal.com"></div>
+      <button class="wb" onclick="sbwd()">Submit Withdrawal Request</button>
+      <div class="stitle">📜 Withdrawal History</div>
+      <div id="wh"><div class="eh"><div class="eh-i">📭</div><div class="eh-t">No requests yet</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- POLICY -->
+<div id="pol">
+  <div class="pol-hdr"><div class="pol-bk" onclick="cpol()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="pol-hdr-t">Terms, Policy &amp; How It Works</div></div>
+  <div class="pol-sc">
+    <div class="ph1">TBR Rewards — Full Terms &amp; Policy</div>
+    <div class="pu">Effective: May 2026 · Version 1.0</div>
+    <div class="ps">
+      <div class="ph2">What is TBR Rewards?</div>
+      <div class="pp">TBR Rewards is a legitimate reward-based earning platform built as a Telegram Mini App. Users earn real money by completing simple daily micro-tasks such as watching short advertisements and inviting friends.</div>
+      <div class="pp">We partner with advertising networks and sponsors who pay us for genuine user engagement. A significant portion of that revenue is shared directly with you. Every reward you receive is backed by real advertiser budgets — making TBR Rewards a transparent, honest earning platform.</div>
+      <div class="pp">TBR Rewards is completely free to join and use. There is no deposit, no subscription, and no hidden fee required at any point.</div>
+    </div>
+    <div class="ps">
+      <div class="ph2">How to Use TBR Rewards</div>
+      <div class="pp"><strong style="color:var(--cyan)">Step 1 — Create your account.</strong> Open TBR Rewards through Telegram. Complete the quick onboarding (gender and age confirmation) and your account is created instantly. Your Telegram identity is used securely — no password needed.</div>
+      <div class="pp"><strong style="color:var(--cyan)">Step 2 — Watch your daily ads.</strong> Each day you are assigned a set of ad tasks. Tap the first available ad task, the ad will load on your screen, and a timer will count down. Once the timer finishes, tap "Claim Reward" and your earnings are instantly added to your balance. You must complete ads in order — the next ad unlocks only after the previous one is claimed.</div>
+      <div class="pp"><strong style="color:var(--cyan)">Step 3 — Complete all daily tasks.</strong> Your daily tasks reset every 24 hours. Completing all ads assigned for the day maximizes your earnings for that day. Missing a day simply means you pick up from your current position the next day.</div>
+      <div class="pp"><strong style="color:var(--cyan)">Step 4 — Invite friends.</strong> Go to the Invite tab, copy your unique referral link, and share it. Every friend who joins earns you a referral bonus automatically. You also earn from their referrals at multiple network levels.</div>
+      <div class="pp"><strong style="color:var(--cyan)">Step 5 — Withdraw your earnings.</strong> Once your balance reaches the minimum for your chosen payment method, go to the Withdraw tab, fill in your details, and submit. All payments are processed within 7–14 business days.</div>
+    </div>
+    <div class="ps">
+      <div class="ph2">Daily Earnings &amp; Ad Tasks</div>
+      <div class="pp">TBR Rewards assigns a different number of ad tasks each day. Your daily earning potential changes from day to day — it will generally be anywhere between $2 and $10 per day depending on the day's schedule. The exact number of ads and your potential earnings for that day are clearly displayed each time you open the app.</div>
+      <div class="pp">Each ad task has a timer that runs between 10 and 30 seconds. The duration is set randomly for each ad. You must remain on the ad screen for the full timer duration before your reward is credited. Closing or switching screens during the timer will not credit your balance.</div>
+      <div class="pp">Your earning cycle operates on a repeating schedule. Your cumulative balance grows until you reach the cycle threshold, at which point the daily task schedule resets and a new earning cycle begins. This allows unlimited earning over time.</div>
+      <div class="pbox"><p><strong>Important:</strong> Your entire balance history and progress are saved permanently. If you close the app and return days, weeks, or even months later, everything will be exactly as you left it.</p></div>
+    </div>
+    <div class="ps">
+      <div class="ph2">Withdrawal Methods &amp; Minimums</div>
+      <div class="pp">TBR Rewards supports four payout methods. Choose the one that works best for you:</div>
+      <table class="ptbl">
+        <tr><th>Method</th><th>Minimum</th><th>Processing Time</th></tr>
+        <tr><td>🅿️ PayPal</td><td>$20.00</td><td>7–14 business days</td></tr>
+        <tr><td>🏦 Bank Account</td><td>$25.00</td><td>7–14 business days</td></tr>
+        <tr><td>🪙 Crypto (USDT TRC20)</td><td>$30.00</td><td>7–14 business days</td></tr>
+        <tr><td>💵 Cash Pack / Mobile</td><td>$35.00</td><td>7–14 business days</td></tr>
+      </table>
+      <div class="pbox"><p><strong>Net Payment Terms: 7–14 Business Days.</strong> All withdrawal requests are manually reviewed by our payments team and processed within 7 to 14 business days from submission. Please do not submit duplicate requests during this window. You will be notified once payment is dispatched.</p></div>
+      <div class="pp">Withdrawal requests are fulfilled in the order they are received. During high-volume periods, the full 14-day window may be used. If your payment has not arrived after 14 business days, contact support through the in-app chat.</div>
+    </div>
+    <div class="ps">
+      <div class="ph2">Referral Program</div>
+      <div class="pp">Our multi-level referral program lets you earn passively from your entire network:</div>
+      <ul class="pul">
+        <li><strong style="color:var(--w1)">Level 1 — Direct:</strong> $0.50 for every friend who joins through your link and completes their first ad.</li>
+        <li><strong style="color:var(--w1)">Level 2 — Indirect:</strong> $0.10 for every person your direct referrals bring in.</li>
+        <li><strong style="color:var(--w1)">Level 3 — Extended:</strong> $0.05 from the third level of your network.</li>
+      </ul>
+      <div class="pp">There is no limit to how many people you can invite. Referral bonuses are credited within 24 hours of the qualifying event. Fake or self-referrals will result in account suspension and forfeiture of all earnings.</div>
+      <div class="pbox"><p><strong>Referral Balance Withdrawal Rule:</strong> Your referral balance is kept completely separate from your task earnings. Referral earnings can only be withdrawn once you have successfully referred a minimum of <strong>10 users</strong> (minimum referral balance of $50). Referral balance is not counted toward your regular task withdrawal threshold.</p></div>
+    </div>
+    <div class="ps">
+      <div class="ph2">Fair Use &amp; Anti-Fraud Policy</div>
+      <ul class="pul">
+        <li>Each ad must be watched for its full timer duration. Bypassing the timer in any way will not credit the reward.</li>
+        <li>Using VPNs, proxies, bots, scripts, or any automation tool is strictly prohibited and results in permanent suspension.</li>
+        <li>Only one account per user is allowed. Multiple accounts from the same device or IP will be banned.</li>
+        <li>Any attempt to manipulate balances, task records, or referral counts will result in immediate account termination and forfeiture of all earnings.</li>
+        <li>We use automated fraud detection. Flagged accounts are reviewed within 5 business days.</li>
+        <li>We reserve the right to hold a withdrawal for up to 14 business days for manual verification before processing.</li>
+      </ul>
+    </div>
+    <div class="ps">
+      <div class="ph2">Privacy Policy</div>
+      <div class="pp">We collect only the minimum data required to operate your account: your Telegram user ID and display name, gender and age confirmation, task completion records, balance history, and withdrawal request details.</div>
+      <div class="pp">We never sell, rent, or share your personal information with any third party for marketing. Advertising partners receive only anonymous aggregate data. Financial details you provide for withdrawals are stored securely and used solely for payment processing.</div>
+      <div class="pp">Customer support conversations are automatically and permanently deleted after 7 days. You may request full account and data deletion at any time via the in-app support chat.</div>
+    </div>
+    <div class="ps">
+      <div class="ph2">Why Choose TBR Rewards?</div>
+      <ul class="pul">
+        <li><strong style="color:var(--w1)">100% Free</strong> — No deposit, no fee, no subscription. Start earning immediately at zero cost.</li>
+        <li><strong style="color:var(--w1)">Real Earnings</strong> — Every reward is funded by genuine advertisers. Your time has real monetary value here.</li>
+        <li><strong style="color:var(--w1)">Quick &amp; Flexible</strong> — Complete your daily tasks in 5–10 minutes. No schedule, no pressure.</li>
+        <li><strong style="color:var(--w1)">Secure Identity</strong> — Your account is tied to Telegram. No passwords, no email verification required.</li>
+        <li><strong style="color:var(--w1)">Permanent Balance</strong> — Your data is saved forever. Return after any break without losing a single cent.</li>
+        <li><strong style="color:var(--w1)">Multiple Payouts</strong> — PayPal, bank transfer, crypto, or cash pack — whatever works best for you.</li>
+        <li><strong style="color:var(--w1)">Passive Referral Income</strong> — Your network earns for you even while you're offline.</li>
+        <li><strong style="color:var(--w1)">Full Transparency</strong> — Every transaction is tracked and visible in your account history.</li>
+        <li><strong style="color:var(--w1)">Dedicated Support</strong> — In-app customer support with instant automated answers and human follow-up within 24–48 hours.</li>
+      </ul>
+      <div class="pbox"><p><strong>Support:</strong> Use the message icon (bottom right) for instant automated help, or submit your email for human assistance. Response time: 24–48 hours. For withdrawal inquiries, please allow the full 7–14 business day window before contacting support.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- AD WATCH SCREEN -->
+<div id="adws">
+  <div class="aws-hdr">
+    <div class="aws-t" id="awt">Ad Task #1</div>
+    <div class="aws-rw" id="awr">+$0.00</div>
+  </div>
+  <div class="aws-body">
+    <div class="ad-preview">
+      <div class="ad-visual" id="adVisual">
+        <div class="ad-visual-bg" id="adBg"></div>
+        <div class="ad-visual-overlay"></div>
+        <div class="ad-visual-content">
+          <div class="ad-sponsor"><div class="ad-sponsor-dot"></div><span id="adSponsor">Sponsored</span><span class="ad-18">· Ad · 18+</span></div>
+          <div class="ad-headline" id="adHeadline">Exclusive Offer — Limited Time</div>
+          <div class="ad-desc" id="adDesc">Discover amazing deals and earn rewards. Tap to explore this special offer.</div>
+        </div>
+      </div>
+      <button class="open-ad-btn" id="openAdBtn" onclick="doOpenAd()">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Ad &amp; Earn
+      </button>
+    </div>
+  </div>
+  <div class="aws-foot">
+    <div class="tmr-top">
+      <div class="tmr-lbl">⏱ Time remaining: <span class="tmr-num" id="tnum">--</span>s</div>
+      <div class="tmr-st" id="tst">Open the ad above to start timer</div>
+    </div>
+    <div class="tmr-track"><div class="tmr-fill" id="tfill" style="width:100%"></div></div>
+    <button class="claim-btn" id="clmb" onclick="clmr()">🎉 Claim My Reward!</button>
+    <div class="stay-hint" id="stayHint"></div>
+    <button class="cnl-btn" id="cnlb" onclick="clads()">Cancel</button>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="mno" id="mno" onclick="cmenu()">
+  <div class="mnp" onclick="event.stopPropagation()">
+    <div class="mi" onclick="ocs();cmenu()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Customer Support</div>
+    <div class="mi" onclick="cpyref();cmenu()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share App</div>
+    <div class="mi" onclick="spol();cmenu()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Terms &amp; Policy</div>
+    <div class="mi" onclick="location.reload()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Reload App</div>
+  </div>
+</div>
+
+<!-- CUSTOMER SUPPORT -->
+<button class="cs-fab" onclick="tcs()" id="csfab">
+  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <div class="cs-badge" id="csbg">1</div>
+</button>
+<div class="csw" id="csw">
+  <div class="cs-hdr">
+    <div class="cs-av">🤖</div>
+    <div class="cs-inf"><div class="cs-nm">TBR Support</div><div class="cs-st"><div class="cs-dot"></div>Online · Replies instantly</div></div>
+    <div class="cs-ctrls">
+      <button class="cs-cb" onclick="mins()">−</button>
+      <button class="cs-cb" onclick="maxs()">⛶</button>
+      <button class="cs-cb" onclick="ccs()">×</button>
+    </div>
+  </div>
+  <div class="cs-body" id="csbd"></div>
+  <div class="cs-foot">
+    <div class="cs-ef" id="csef">
+      <div style="font-size:12px;color:var(--w3);margin-bottom:4px">Enter your email — we reply within 24-48 hours:</div>
+      <input class="cs-ei" type="email" id="csem" placeholder="your@email.com">
+      <input class="cs-ei" type="text" id="cssub" placeholder="Brief subject / issue...">
+      <button class="cs-es" onclick="sndml()">Send to Support</button>
+    </div>
+    <div class="cs-human-form" id="csHumanForm" style="display:none">
+      <div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:8px">🧑‍💼 Human Agent — Fill in your details:</div>
+      <input class="cs-ei" type="text" id="csHumanName" placeholder="Your full name...">
+      <input class="cs-ei" type="email" id="csHumanEmail" placeholder="your@email.com">
+      <textarea class="cs-ei cs-ta" id="csHumanMsg" placeholder="Describe your issue in detail..." rows="3"></textarea>
+      <button class="cs-es" id="csHumanSendBtn" onclick="sndHuman()">Send to Human Agent</button>
+    </div>
+    <div class="cs-fh" id="csfh">Tap a question above for instant help</div>
+  </div>
+</div>
+
+<!-- INVITE FRIENDS MODAL -->
+<div class="inv-modal-overlay" id="invModal">
+  <div class="inv-modal">
+    <div class="inv-modal-emoji">🎉</div>
+    <div class="inv-modal-title">Great Work! Now <span>Invite Friends</span></div>
+    <div class="inv-modal-sub">You completed all your tasks today! Share TBR Rewards with friends and earn a bonus for each one who joins.</div>
+    <div class="inv-modal-bonus">
+      <div class="inv-modal-bonus-amt">$5.00</div>
+      <div class="inv-modal-bonus-lbl">Referral Bonus per Friend</div>
+      <div class="inv-modal-bonus-note">Added to your Referral Balance · Withdraw after 10 referrals</div>
+    </div>
+    <button class="inv-modal-btn" onclick="inviteFromModal()">👥 Invite Friends Now</button>
+    <button class="inv-modal-skip" onclick="closeInvModal()">Maybe Later</button>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div class="nb" id="nb">
+  <div class="nb-in">
+    <div class="nb-ic">🎉</div>
+    <div style="flex:1"><div class="nb-tt">All tasks done for today!</div><div class="nb-sb">Invite friends to earn an extra $0.50 per referral</div></div>
+    <div class="nb-x" onclick="cnb()">×</div>
+  </div>
+</div>
+<div class="toast" id="tst2"></div>
+<nav class="bnav" id="bnav">
+  <div class="ni on" id="n-ads" onclick="st('ads')"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Ads</span></div>
+  <div class="ni" id="n-inv" onclick="st('inv')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Invite</span></div>
+  <div class="ni" id="n-wd" onclick="st('wd')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Withdraw</span></div>
+</nav>
+
+<script>
+var LINKS=["https://omg10.com/4/10668014","https://omg10.com/4/10668014","https://www.profitablecpmratenetwork.com/iudnzvevy3?key=b35c68e9ea7c456f2a104a9f0a2c2803","https://www.profitablecpmratenetwork.com/phzrky41am?key=a9478d31168e95094f7840ebe529cee2","https://ppscjobs24.shop/saudi-arabia-careers-guide-from-job-search-to-work-visa-2026/","https://omg10.com/4/9786444"];
+var DC=[{ads:10,total:3.40},{ads:8,total:3.00},{ads:14,total:6.35},{ads:14,total:6.35},{ads:7,total:3.00},{ads:7,total:3.00}];
+var S={},DEF={userId:null,userName:'User',gender:null,balance:0,totalEarned:0,dayNum:1,cycleDay:1,adsWatchedToday:0,dayEarned:0,withdrawHistory:[],friendsCount:0,refEarned:0,refBalance:0,refWithdrawn:0,cycleTotal:0,lastLoginDate:null,adTimers:[],csH:[],csLR:null,shownInviteNotif:false,notifShownDays:[]};
+var unames=[],cad=null,ti=null,sm2={key:'paypal',min:20,label:'PayPal Email',ph:'e.g. you@paypal.com'},csO=false,csM=false;
+function ls(){try{var r=localStorage.getItem('tbr_v5');S=r?Object.assign({},DEF,JSON.parse(r)):Object.assign({},DEF);var n=Date.now();if(S.csH)S.csH=S.csH.filter(function(m){return n-m.ts<604800000;});}catch(e){S=Object.assign({},DEF);}}
+function ss(){try{localStorage.setItem('tbr_v5',JSON.stringify(S));}catch(e){}}
+var og=null;
+function so(el){var g=el.dataset.g;document.querySelectorAll('[data-g="'+g+'"]').forEach(function(e){e.classList.remove('sel');});el.classList.add('sel');if(g==='gender')og=el.dataset.v;}
+function startApp(){
+  if(!og){toast('Please select your gender');return;}
+  if(!document.getElementById('ageck').checked){toast('Please confirm you are 18 or older');return;}
+  var tu=null;try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe)tu=window.Telegram.WebApp.initDataUnsafe.user;}catch(e){}
+  var uid,unm;
+  if(tu&&tu.id){uid=String(tu.id);unm=((tu.first_name||'')+(tu.last_name?' '+tu.last_name:'')).trim()||tu.username||'User';}
+  else{document.getElementById('nfw').style.display='block';var nv=document.getElementById('obni').value.trim();if(!nv){toast('Enter your display name');return;}if(unames.indexOf(nv.toLowerCase())!==-1){toast('Name taken — try '+nv+'1');return;}unm=nv;uid='tbr_'+Date.now();unames.push(nv.toLowerCase());}
+  S.userId=uid;S.userName=unm;S.gender=og;var td=new Date().toISOString().split('T')[0];S.lastLoginDate=td;S.accountCreatedDate=td;S.adTimers=gt(DC[0].ads);ss();
+  document.getElementById('ob').style.display='none';initApp();
+}
+function initApp(){
+  try{if(window.Telegram&&window.Telegram.WebApp){window.Telegram.WebApp.ready();window.Telegram.WebApp.expand();}}catch(e){}
+  chkDay();
+  document.getElementById('ma').style.display='flex';document.getElementById('ob').style.display='none';document.getElementById('bnav').style.display='flex';
+  var i=((S.userName||'U')[0]).toUpperCase();
+  document.getElementById('avb').textContent=i;document.getElementById('hn').textContent=S.userName;document.getElementById('hi2').textContent='ID: '+(S.userId||'---').slice(-8);
+  document.getElementById('rlt').textContent='https://t.me/TBRRewardsBot/app?start='+(S.userId||'ref');
+  upd();ra();rh();setTimeout(function(){document.getElementById('csbg').classList.add('on');},2000);
+}
+function chkDay(){
+  var td=new Date().toISOString().split('T')[0];
+  if(S.lastLoginDate!==td){if(S.lastLoginDate){S.cycleDay=(S.cycleDay||1)+1;if(S.cycleDay>6)S.dayNum=Math.floor(Math.random()*6)+1;else S.dayNum=S.cycleDay;}
+  S.adsWatchedToday=0;S.dayEarned=0;S.lastLoginDate=td;S.adTimers=gt(DC[(S.dayNum||1)-1].ads);ss();}
+}
+function gt(n){var t=[];for(var i=0;i<n;i++)t.push(10+Math.floor(Math.random()*21));return t;}
+function upd(){
+  var cfg=DC[(S.dayNum||1)-1],e=S.dayEarned||0,p=cfg.total>0?Math.min(e/cfg.total,1):0;
+  document.getElementById('bd').textContent='$'+(S.balance||0).toFixed(2);
+  document.getElementById('dpv').textContent='$'+e.toFixed(2)+' / $'+cfg.total.toFixed(2);
+  document.getElementById('dpf').style.width=(p*100)+'%';
+  document.getElementById('sta').textContent=S.adsWatchedToday||0;
+  document.getElementById('stc').textContent='Day '+(S.cycleDay||1);
+  document.getElementById('stt').textContent='$'+(S.totalEarned||0).toFixed(2);
+  document.getElementById('ted').textContent='$'+cfg.total.toFixed(2);
+  document.getElementById('ald').textContent=Math.max(0,cfg.ads-(S.adsWatchedToday||0));
+  document.getElementById('abg').textContent=(S.adsWatchedToday||0)+'/'+cfg.ads;
+  document.getElementById('wav').textContent='$'+(S.balance||0).toFixed(2);
+  document.getElementById('fc').textContent=S.friendsCount||0;
+  document.getElementById('re').textContent='$'+(S.refEarned||0).toFixed(2);
+  // Referral balance separate display
+  var rb=S.refBalance||0;
+  var rbEl=document.getElementById('refBalDisplay');
+  if(rbEl) rbEl.textContent='$'+rb.toFixed(2);
+  var rbNeeded=document.getElementById('refBalNeeded');
+  if(rbNeeded){
+    var needed=Math.max(0,10-(S.friendsCount||0));
+    rbNeeded.textContent=needed>0?'Invite '+needed+' more to unlock withdrawal':'✅ Ready to withdraw!';
+  }
+  var pct=Math.min(((S.friendsCount||0)/10)*100,100);
+  var fillEl=document.getElementById('refBalFill');
+  if(fillEl) fillEl.style.width=pct+'%';
+}
+function ra(){
+  var cfg=DC[(S.dayNum||1)-1],pa=cfg.total/cfg.ads,w=S.adsWatchedToday||0,h='';
+  for(var i=0;i<cfg.ads;i++){
+    var dn=i<w,nx=i===w,lk=i>w,sc=(S.adTimers&&S.adTimers[i])?S.adTimers[i]:15;
+    h+='<div class="adc'+(dn?' dn':'')+(lk?' lk':'')+'"'+(nx?' onclick="oad('+i+','+pa.toFixed(4)+','+sc+')"':'')+'>'+
+    '<div class="adc-in"><div class="adc-top">'+
+    '<div class="adc-play'+(dn?' dp':'')+'">'+
+    (dn?'<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white"><polyline points="20 6 9 17 4 12"/></svg>':'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>')+
+    '</div><div class="adc-meta"><div class="adc-nm">Ad Task #'+(i+1)+'</div><div class="adc-hn">'+sc+' sec · Earns instantly</div></div>'+
+    '<div class="adc-rw'+(dn?' db':'')+'">'+( dn?'✓ Earned':'+$'+pa.toFixed(2))+'</div></div>'+
+    '<div class="adc-pb"><div class="adc-pf" style="width:'+(dn?100:0)+'%"></div></div>'+
+    '<div class="adc-sr"><div class="adc-st '+(dn?'d':nx?'r':'l')+'"><div class="sd '+(dn?'g':nx?'c':'')+'"></div>'+(dn?'Completed':nx?'Ready to earn':'Locked')+'</div><div class="adc-ct">'+(i+1)+' of '+cfg.ads+'</div></div></div></div>';
+  }
+  document.getElementById('adl').innerHTML=h;
+}
+// AD CREATIVE DATA — shown as visual ad cards
+var AD_CREATIVES=[
+  {sponsor:'Exclusive Offer',headline:'Earn Big Every Day — Start Now',desc:'Join thousands earning real rewards daily. Limited spots available.',bg:'linear-gradient(135deg,#0a1628 0%,#1a3a5c 50%,#0d2137 100%)',accent:'#00C6FF'},
+  {sponsor:'Hot Deal Alert',headline:'Top Investment Opportunity 2026',desc:'Smart people are already earning. Do not miss your window.',bg:'linear-gradient(135deg,#1a0a28 0%,#3a1a5c 50%,#2d0d45 100%)',accent:'#B06AFF'},
+  {sponsor:'Featured Partner',headline:'Get Paid for Your Attention',desc:'Premium advertisers want to reach you. Watch, earn, withdraw.',bg:'linear-gradient(135deg,#001a10 0%,#003a20 50%,#001a15 100%)',accent:'#00E5C3'},
+  {sponsor:'Sponsored Content',headline:'New Earning Platform — Join Free',desc:'No investment needed. Watch short content and get paid instantly.',bg:'linear-gradient(135deg,#1a1000 0%,#3a2800 50%,#2d1f00 100%)',accent:'#F59E0B'},
+  {sponsor:'Partner Network',headline:'Daily Rewards Waiting For You',desc:'Complete simple tasks and claim real money. Hundreds already paid out.',bg:'linear-gradient(135deg,#1a0008 0%,#3a001a 50%,#2d0010 100%)',accent:'#F43F5E'},
+  {sponsor:'Verified Ad',headline:'Click. Watch. Earn. Repeat.',desc:'The simplest earning system online. No experience needed at all.',bg:'linear-gradient(135deg,#001020 0%,#002a40 50%,#001830 100%)',accent:'#38BDF8'}
+];
+
+// Only use non-ppsc links for Telegram browser opening
+var TLINKS=[
+  "https://omg10.com/4/10668014",
+  "https://omg10.com/4/10668014",
+  "https://www.profitablecpmratenetwork.com/iudnzvevy3?key=b35c68e9ea7c456f2a104a9f0a2c2803",
+  "https://www.profitablecpmratenetwork.com/phzrky41am?key=a9478d31168e95094f7840ebe529cee2",
+  "https://omg10.com/4/9786444"
+];
+
+var adOpened=false;
+
+function oad(idx,rw,sc){
+  var reward=parseFloat(rw);
+  var secs=10+Math.floor(Math.random()*13); // 10-22s random
+
+  // 50/50 chance: direct link open OR show watch screen
+  var direct=Math.random()<0.5;
+
+  if(direct){
+    // Direct mode: open link immediately in Telegram browser, then credit after timer
+    var lnk=TLINKS[Math.floor(Math.random()*TLINKS.length)];
+    try{
+      if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openLink){
+        window.Telegram.WebApp.openLink(lnk);
+      } else {
+        window.open(lnk,'_blank');
+      }
+    }catch(e){window.open(lnk,'_blank');}
+    // Start silent background timer — show minimal overlay
+    cad={idx:idx,rw:reward,sc:secs};
+    adOpened=true; // Already opened
+    document.getElementById('awt').textContent='Ad Task #'+(idx+1);
+    document.getElementById('awr').textContent='+$'+reward.toFixed(2);
+    document.getElementById('clmb').classList.remove('show');
+    document.getElementById('tnum').textContent=secs;
+    document.getElementById('tfill').style.transition='none';
+    document.getElementById('tfill').style.width='100%';
+    document.getElementById('tst').textContent='Ad opened — timer running...';
+    var hint=10+Math.floor(Math.random()*13);
+    document.getElementById('stayHint').textContent='Stay on the ad for: '+hint+' seconds';
+    document.getElementById('openAdBtn').style.display='none';
+    document.getElementById('adws').classList.add('on');
+    document.getElementById('bnav').style.display='none';
+    // Set creative
+    var cr=AD_CREATIVES[Math.floor(Math.random()*AD_CREATIVES.length)];
+    document.getElementById('adBg').style.background=cr.bg;
+    document.getElementById('adSponsor').textContent=cr.sponsor;
+    document.getElementById('adHeadline').textContent='Ad opened in Telegram browser';
+    document.getElementById('adDesc').textContent='Stay on the ad page. Come back here when the timer finishes to claim your reward.';
+    document.querySelector('.ad-sponsor-dot').style.background=cr.accent;
+    stmr(secs,reward);
+  } else {
+    // Watch screen mode: show ad card, user must tap Open Ad button
+    cad={idx:idx,rw:reward,sc:secs};
+    adOpened=false;
+    document.getElementById('awt').textContent='Ad Task #'+(idx+1);
+    document.getElementById('awr').textContent='+$'+reward.toFixed(2);
+    document.getElementById('clmb').classList.remove('show');
+    document.getElementById('tnum').textContent=secs;
+    document.getElementById('tfill').style.transition='none';
+    document.getElementById('tfill').style.width='100%';
+    document.getElementById('tst').textContent='Tap "Open Ad & Earn" to start';
+    document.getElementById('stayHint').textContent='';
+    document.getElementById('openAdBtn').style.display='flex';
+    document.getElementById('adws').classList.add('on');
+    document.getElementById('bnav').style.display='none';
+    var cr=AD_CREATIVES[Math.floor(Math.random()*AD_CREATIVES.length)];
+    document.getElementById('adBg').style.background=cr.bg;
+    document.getElementById('adSponsor').textContent=cr.sponsor;
+    document.getElementById('adHeadline').textContent=cr.headline;
+    document.getElementById('adDesc').textContent=cr.desc;
+    document.querySelector('.ad-sponsor-dot').style.background=cr.accent;
+  }
+}
+
+function doOpenAd(){
+  if(adOpened) return;
+  adOpened=true;
+  document.getElementById('openAdBtn').style.display='none';
+
+  // Pick random link and open in Telegram built-in browser
+  var lnk=TLINKS[Math.floor(Math.random()*TLINKS.length)];
+  try{
+    if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openLink){
+      window.Telegram.WebApp.openLink(lnk);
+    } else {
+      window.open(lnk,'_blank');
+    }
+  }catch(e){window.open(lnk,'_blank');}
+
+  // Random stay time hint 10-22
+  var hint=10+Math.floor(Math.random()*13);
+  document.getElementById('stayHint').textContent='Stay on the page for: '+hint+' seconds';
+  document.getElementById('tst').textContent='Timer running...';
+  stmr(cad.sc,cad.rw);
+}
+
+function stmr(sc,rw){
+  clearInterval(ti);
+  var rem=sc,tot=sc;
+  setTimeout(function(){
+    document.getElementById('tfill').style.transition='width '+tot+'s linear';
+    document.getElementById('tfill').style.width='0%';
+  },150);
+  ti=setInterval(function(){
+    rem--;
+    document.getElementById('tnum').textContent=rem;
+    if(rem<=0){
+      clearInterval(ti);
+      document.getElementById('tnum').textContent='✓';
+      document.getElementById('tst').textContent='Timer complete!';
+      document.getElementById('stayHint').textContent='';
+      // Only show claim button if user actually opened the ad link
+      if(adOpened){
+        document.getElementById('clmb').dataset.rw=rw;
+        document.getElementById('clmb').classList.add('show');
+      } else {
+        document.getElementById('tst').textContent='You must open the ad first!';
+        document.getElementById('openAdBtn').style.display='flex';
+        document.getElementById('openAdBtn').textContent='Open Ad to Claim';
+        // Reset timer so they have to open and wait again
+        adOpened=false;
+      }
+    }
+  },1000);
+}
+
+function clmr(){
+  var rw=parseFloat(document.getElementById('clmb').dataset.rw)||0;
+  clearInterval(ti);clads();
+  S.balance=(S.balance||0)+rw;S.totalEarned=(S.totalEarned||0)+rw;
+  S.dayEarned=(S.dayEarned||0)+rw;S.adsWatchedToday=(S.adsWatchedToday||0)+1;
+  S.cycleTotal=(S.cycleTotal||0)+rw;
+  if(S.cycleTotal>=30){S.cycleTotal=0;S.cycleDay=1;S.dayNum=1;setTimeout(function(){toast('🏆 $30 cycle complete! Restarting...');},400);}
+  ss();coins();toast('🎉 +$'+rw.toFixed(2)+' added to your balance!');upd();ra();
+  var cfg=DC[(S.dayNum||1)-1];
+  if(S.adsWatchedToday>=cfg.ads){
+    setTimeout(snb,1800);
+    // Show invite notification after ALL tasks done each day
+    var today=new Date().toISOString().split('T')[0];
+    S.notifShownDays=S.notifShownDays||[];
+    if(S.notifShownDays.indexOf(today)===-1){
+      S.notifShownDays.push(today);
+      ss();
+      setTimeout(showInviteModal,3000);
+    }
+  }
+}
+function clads(){
+  clearInterval(ti);
+  document.getElementById('adws').classList.remove('on');
+  document.getElementById('bnav').style.display='flex';
+  adOpened=false;
+}
+function st(tab){['ads','inv','wd'].forEach(function(t){document.getElementById('p-'+t).classList.remove('on');var tb=document.getElementById('t-'+t);if(tb)tb.classList.remove('on');var nv=document.getElementById('n-'+t);if(nv)nv.classList.remove('on');});document.getElementById('p-'+tab).classList.add('on');var tb=document.getElementById('t-'+tab);if(tb)tb.classList.add('on');var nv=document.getElementById('n-'+tab);if(nv)nv.classList.add('on');document.getElementById('sc').scrollTop=0;}
+function sm(el,k,l,mn,ph){document.querySelectorAll('.mc').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');sm2={key:k,min:parseFloat(mn),label:l,ph:ph};document.getElementById('wal').textContent=l;document.getElementById('wad').placeholder=ph;var em=(S.cycleDay<=1&&k==='paypal')?15:sm2.min;document.getElementById('wm2').textContent='$'+em.toFixed(2);}
+function sbwd(){var a=parseFloat(document.getElementById('wa').value),addr=document.getElementById('wad').value.trim(),em=(S.cycleDay<=1&&sm2.key==='paypal')?15:sm2.min;if(!a||a<em){toast('Minimum is $'+em.toFixed(2));return;}if(a>(S.balance||0)){toast('Insufficient balance');return;}if(!addr){toast('Enter your '+sm2.label);return;}S.balance-=a;S.withdrawHistory=S.withdrawHistory||[];S.withdrawHistory.unshift({amt:a,method:sm2.key,addr:addr,status:'pending',date:new Date().toLocaleDateString()});ss();rh();upd();document.getElementById('wa').value='';document.getElementById('wad').value='';toast('📤 Submitted! Processing in 7–14 business days');}
+function rh(){var h=S.withdrawHistory||[];if(!h.length){document.getElementById('wh').innerHTML='<div class="eh"><div class="eh-i">📭</div><div class="eh-t">No requests yet</div></div>';return;}var ic={paypal:'🅿️',bank:'🏦',crypto:'🪙',cashpack:'💵'};document.getElementById('wh').innerHTML=h.map(function(x){return '<div class="hi"><div><div class="hm">'+(ic[x.method]||'💰')+' '+x.method.toUpperCase()+'</div><div class="hd">'+x.date+'</div></div><div style="text-align:right"><div class="ha">$'+x.amt.toFixed(2)+'</div><span class="hs '+(x.status==='pending'?'sp':x.status==='approved'?'sa':'sr2')+'">'+x.status+'</span></div></div>';}).join('');}
+function cpyref(){try{navigator.clipboard.writeText(document.getElementById('rlt').textContent);}catch(e){}toast('📋 Referral link copied!');}
+function shrref(){var l=document.getElementById('rlt').textContent;try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openTelegramLink)window.Telegram.WebApp.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('Join TBR Rewards and earn real money daily! 💰'));else if(navigator.share)navigator.share({title:'TBR Rewards',url:l});}catch(e){}}
+function spol(){document.getElementById('pol').classList.add('on');document.getElementById('ma').style.display='none';document.getElementById('bnav').style.display='none';document.getElementById('csfab').style.display='none';}
+function cpol(){document.getElementById('pol').classList.remove('on');document.getElementById('ma').style.display='flex';document.getElementById('bnav').style.display='flex';document.getElementById('csfab').style.display='flex';}
+function omenu(){document.getElementById('mno').classList.add('on');}
+function cmenu(){document.getElementById('mno').classList.remove('on');}
+
+// CS QA
+var QA={
+  main:[{q:'💰 How do I earn money?',f:'earn'},{q:'📤 How does withdrawal work?',f:'wd2'},{q:'🔗 How does the referral program work?',f:'ref'},{q:'⏱ Why must I wait for the timer?',f:'tmr'},{q:'💳 What payment methods do you support?',f:'pay'},{q:'📅 How long does payment processing take?',f:'pt'},{q:'🔐 Is my data safe?',f:'priv'},{q:'❓ I have another question',f:'email'}],
+  earn:{m:"You earn by watching short ad tasks every day. Tap an ad, wait for the timer to finish, then tap Claim. Your balance updates instantly. Your daily earnings vary — generally between $2 and $10 depending on the day's schedule.",n:'main'},
+  wd2:{m:"Go to the Withdraw tab, select your payment method, enter the amount and your payment details, then submit. All withdrawals are processed within 7–14 business days.",n:'pay'},
+  ref:{m:"Go to the Invite tab and copy your unique referral link. Share it anywhere! Every friend who joins earns you $0.50. You also earn $0.10 from their referrals and $0.05 from the next level down. No limit on invites!",n:'main'},
+  tmr:{m:"The timer ensures advertisers receive genuine engagement — that is what makes the rewards possible! Each ad has a randomly set timer between 10 and 30 seconds. Stay on screen until it finishes to earn your reward.",n:'main'},
+  pay:{m:"We support 4 payment methods:\n🅿️ PayPal — Min $20\n🏦 Bank Transfer — Min $25\n🪙 Crypto USDT TRC20 — Min $30\n💵 Cash Pack — Min $35",n:'pt'},
+  pt:{m:"All withdrawals are processed within 7 to 14 business days. This is our standard processing window. If your payment hasn't arrived after 14 business days, contact us by sharing your email below.",n:'main'},
+  priv:{m:"Your data is stored securely and never sold to anyone. We only collect what's needed to run your account. Support chats are automatically deleted after 7 days. You can request full account deletion anytime.",n:'main'},
+  email:{m:"Choose how you would like to get help:",n:'contactChoice'},
+  contactChoice:{m:"",n:'main'},
+  human:{m:"A human agent will review your message and respond within 24–48 hours. Please fill in the form below. 📬",n:'humanForm'}
+};
+function camsg(tx,bot){S.csH=S.csH||[];var m={text:tx,bot:bot,ts:Date.now()};S.csH.push(m);ss();rmsg(m);var b=document.getElementById('csbd');setTimeout(function(){b.scrollTop=b.scrollHeight;},100);}
+function rmsg(m){var b=document.getElementById('csbd'),d=document.createElement('div');d.className='cmsg '+(m.bot?'b':'u');var t=new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});d.innerHTML=(m.bot?'<div class="cm-av">🤖</div>':'')+' <div><div class="cm-bbl">'+m.text.replace(/\n/g,'<br>')+'</div><div class="cm-t">'+t+'</div></div>';b.appendChild(d);}
+function ssugg(flow){
+  var b=document.getElementById('csbd'),w=document.createElement('div');
+  w.className='cs-suggs';
+  var items;
+  if(!flow||flow==='main'){
+    items=QA.main;
+  } else if(flow==='contactChoice'){
+    items=[
+      {q:'📧 Send us an email',f:'emailForm'},
+      {q:'🧑‍💼 Talk to a Human Agent',f:'humanAgentForm'},
+      {q:'⬅ Back to main menu',f:'main'}
+    ];
+  } else {
+    items=[{q:'⬅ Back to main menu',f:'main'}];
+  }
+  items.forEach(function(it){
+    var btn=document.createElement('button');
+    btn.className='cs-sq';
+    btn.textContent=it.q;
+    btn.onclick=function(){
+      w.remove();
+      camsg(it.q,false);
+      if(it.f==='main'){
+        setTimeout(function(){camsg("Is there anything else I can help you with? 👇",true);setTimeout(function(){ssugg('main');},400);},400);
+      } else if(it.f==='emailForm'){
+        setTimeout(function(){semail();},400);
+      } else if(it.f==='humanAgentForm'){
+        setTimeout(function(){showHumanForm();},400);
+      } else {
+        var qa=QA[it.f];
+        if(qa){
+          setTimeout(function(){
+            if(qa.m) camsg(qa.m,true);
+            setTimeout(function(){ssugg(qa.n||'main');},500);
+          },400);
+        }
+      }
+    };
+    w.appendChild(btn);
+  });
+  b.appendChild(w);
+  setTimeout(function(){b.scrollTop=b.scrollHeight;},100);
+}
+function semail(){
+  camsg("Fill in your email below and tap Send. Our team will reply within 24-48 hours.",true);
+  document.getElementById('csef').classList.add('on');
+  document.getElementById('csHumanForm').style.display='none';
+  document.getElementById('csfh').style.display='none';
+}
+
+function showHumanForm(){
+  camsg("Please fill in your name, email and message. A human agent will respond within 24-48 hours.",true);
+  document.getElementById('csHumanForm').style.display='flex';
+  document.getElementById('csef').classList.remove('on');
+  document.getElementById('csfh').style.display='none';
+}
+
+function sndHuman(){
+  var nm=document.getElementById('csHumanName').value.trim();
+  var em=document.getElementById('csHumanEmail').value.trim();
+  var msg=document.getElementById('csHumanMsg').value.trim();
+  if(!nm){toast('Please enter your name');return;}
+  if(!em||!em.includes('@')){toast('Please enter a valid email');return;}
+  if(!msg){toast('Please describe your issue');return;}
+  var btn=document.getElementById('csHumanSendBtn');
+  btn.textContent='Sending...';btn.disabled=true;
+  fetch('https://formspree.io/f/xykopldq',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({
+      name:nm,
+      email:em,
+      subject:'TBR Rewards - Human Agent Request',
+      message:'Name: '+nm+'\nEmail: '+em+'\nUser ID: '+(S.userId||'Unknown')+'\nMessage: '+msg+'\nDate: '+new Date().toLocaleString()
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='Send Message';btn.disabled=false;
+    if(data.ok||data.next){
+      document.getElementById('csHumanForm').style.display='none';
+      document.getElementById('csfh').style.display='block';
+      document.getElementById('csHumanName').value='';
+      document.getElementById('csHumanEmail').value='';
+      document.getElementById('csHumanMsg').value='';
+      camsg("✅ Message received! A human agent will contact you at "+em+" within 24-48 hours. Thank you for your patience.",true);
+      setTimeout(function(){ssugg('main');},600);
+    } else {
+      toast('Failed to send. Please try again.');
+    }
+  })
+  .catch(function(){
+    btn.textContent='Send Message';btn.disabled=false;
+    toast('Network error. Please try again.');
+  });
+}
+function sndml(){
+  var em=document.getElementById('csem').value.trim(),sub=document.getElementById('cssub').value.trim();
+  if(!em||!em.includes('@')){toast('Enter a valid email');return;}
+  var btn=document.querySelector('.cs-es');
+  btn.textContent='Sending...';btn.disabled=true;
+  fetch('https://formspree.io/f/xykopldq',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({
+      email:em,
+      subject:'TBR Rewards Support - '+(sub||'Support Request'),
+      message:'User: '+(S.userName||'Unknown')+'\nUser ID: '+(S.userId||'Unknown')+'\nEmail: '+em+'\nIssue: '+(sub||'Support Request')+'\nDate: '+new Date().toLocaleString()
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='Send to Support Team';btn.disabled=false;
+    if(data.ok||data.next){
+      document.getElementById('csef').classList.remove('on');
+      document.getElementById('csfh').style.display='block';
+      document.getElementById('csem').value='';
+      document.getElementById('cssub').value='';
+      camsg('\u2705 Message received! We\'ll contact you at '+em+' within 24-48 hours.',true);
+      setTimeout(function(){ssugg('main');},600);
+    } else {
+      toast('\u274C Failed to send. Please try again.');
+    }
+  })
+  .catch(function(){
+    btn.textContent='Send to Support Team';btn.disabled=false;
+    toast('\u274C Network error. Please try again.');
+  });
+}
+function ocs(){csO=true;csM=false;document.getElementById('csw').classList.add('on');document.getElementById('csw').classList.remove('mini');document.getElementById('csbg').classList.remove('on');var b=document.getElementById('csbd');b.innerHTML='';(S.csH||[]).forEach(rmsg);if(!(S.csH&&S.csH.length)){var nm=S.userName||'there',ret=S.lastLoginDate&&S.accountCreatedDate&&S.lastLoginDate!==S.accountCreatedDate,gr=ret?'Welcome back, '+nm+'! 👋':'Hi '+nm+'! 👋 Welcome to TBR Rewards!';setTimeout(function(){camsg(gr+'\n\nI\'m your TBR Rewards assistant. How may I assist you today?',true);setTimeout(function(){ssugg('main');},600);},300);}else{setTimeout(function(){b.scrollTop=b.scrollHeight;},100);}}
+function tcs(){if(csO&&!csM)ccs();else if(csM)maxs();else ocs();}
+function ccs(){csO=false;document.getElementById('csw').classList.remove('on');}
+function mins(){csM=!csM;document.getElementById('csw').classList.toggle('mini',csM);}
+function maxs(){csM=false;document.getElementById('csw').classList.remove('mini');}
+function snb(){var b=document.getElementById('nb');b.classList.add('on');setTimeout(function(){b.classList.remove('on');},6000);}
+
+function showInviteModal(){
+  document.getElementById('invModal').classList.add('on');
+}
+function closeInvModal(){
+  document.getElementById('invModal').classList.remove('on');
+}
+function inviteFromModal(){
+  closeInvModal();
+  // Switch to invite tab and share
+  st('inv');
+  setTimeout(function(){shrref();},300);
+}
+
+// Simulate referral bonus (called when a referral is confirmed)
+function addRefBonus(amount){
+  amount=amount||5;
+  S.refBalance=(S.refBalance||0)+amount;
+  S.refEarned=(S.refEarned||0)+amount;
+  S.friendsCount=(S.friendsCount||0)+1;
+  // Update progress bar
+  var pct=Math.min(((S.friendsCount||0)/10)*100,100);
+  var fillEl=document.getElementById('refBalFill');
+  if(fillEl) fillEl.style.width=pct+'%';
+  ss();upd();
+  toast('🎁 +$'+amount.toFixed(2)+' referral bonus earned!');
+}
+function cnb(){document.getElementById('nb').classList.remove('on');}
+function toast(m){var t=document.getElementById('tst2');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2800);}
+function coins(){for(var i=0;i<6;i++){(function(i){setTimeout(function(){var el=document.createElement('div');el.className='cfx';el.textContent=['🪙','💰','✨','💵'][Math.floor(Math.random()*4)];el.style.left=(60+Math.random()*(window.innerWidth-120))+'px';el.style.top=(window.innerHeight*.5+Math.random()*60)+'px';document.body.appendChild(el);setTimeout(function(){el.remove();},950);},i*120);})(i);}}
+ls();
+// Safe boot - works in Telegram AND regular browser preview
+function boot(){
+  if(S.userId){
+    document.getElementById('ob').style.display='none';
+    initApp();
+  } else {
+    document.getElementById('ob').style.display='flex';
+    document.getElementById('bnav').style.display='none';
+  }
+}
+try{
+  if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.ready){
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
+}catch(e){}
+boot();
+</script>
+</body>
+</html>
